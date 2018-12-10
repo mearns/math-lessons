@@ -20,7 +20,7 @@ export function main () {
   const start = new Date()
   const timer = setInterval(() => {
     const elapsedTime = new Date() - start
-    const isDone = group(elapsedTime / 1000)
+    const isDone = group.animate(elapsedTime / 1000)
     if (isDone) {
       clearInterval(timer)
     }

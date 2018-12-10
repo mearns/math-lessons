@@ -6,14 +6,17 @@ function createLinearAnimation (from, to, speed) {
   const dy = ey - sy
   const dist = Math.sqrt(dx * dx + dy * dy)
   const time = dist / speed
-  const animation = (elapsedTime) => {
-    const pctComplete = elapsedTime / time
-    if (pctComplete >= 1.0) {
-      animation.location = to
-      return true
-    } else {
-      animation.location = [sx + dx * pctComplete, sy + dy * pctComplete]
-      return false
+  const animation = {
+    location: to,
+    animate: elapsedTime => {
+      const pctComplete = elapsedTime / time
+      if (pctComplete >= 1.0) {
+        animation.location = to
+        return true
+      } else {
+        animation.location = [sx + dx * pctComplete, sy + dy * pctComplete]
+        return false
+      }
     }
   }
   return animation
@@ -39,15 +42,17 @@ export function createRectangularGroupAnimation (from, to, speed) {
     unitLocations[i] = start
     unitAnimations[i] = createLinearAnimation(start, end, speed)
   }
-  const animation = (elapsedTime) => {
-    let notDone = false
-    for (let i = 0; i < area; i++) {
-      const unitDone = unitAnimations[i](elapsedTime)
-      notDone = notDone || !unitDone
-      animation.unitLocations[i] = unitAnimations[i].location
+  const animation = {
+    unitLocations,
+    animate: (elapsedTime) => {
+      let notDone = false
+      for (let i = 0; i < area; i++) {
+        const unitDone = unitAnimations[i].animate(elapsedTime)
+        notDone = notDone || !unitDone
+        unitLocations[i] = unitAnimations[i].location
+      }
+      return !notDone
     }
-    return !notDone
   }
-  animation.unitLocations = unitLocations
   return animation
 }
