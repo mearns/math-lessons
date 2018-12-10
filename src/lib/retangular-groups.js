@@ -28,31 +28,48 @@ function findRectangularLocation (columns, rows, idx) {
   return [c, r]
 }
 
-export function createRectangularGroupAnimation (from, to, speed) {
-  const area = from[0] * from[1]
-  if (to[0] * to[1] !== area) {
-    throw new Error('Invalid rectangle transformation')
+export class RectangularGroup {
+  constructor (columns, rows) {
+    this.columns = columns
+    this.rows = rows
+    this.area = columns * rows
+    this.unitLocations = new Array(this.area)
+    for (let i = 0; i < this.area; i++) {
+      this.unitLocations[i] = findRectangularLocation(columns, rows, i)
+    }
+    this.animation = null
   }
-  const unitAnimations = new Array(area)
-  const unitLocations = new Array(area)
-  for (let i = 0; i < area; i++) {
-    const start = findRectangularLocation(...from, i)
-    const [ey, ex] = findRectangularLocation(to[1], to[0], i)
-    const end = [ex, ey]
-    unitLocations[i] = start
-    unitAnimations[i] = createLinearAnimation(start, end, speed)
+
+  animate (elapsedTime) {
+    if (this.animation) {
+      const done = this.animation(elapsedTime)
+      if (done) {
+        this.animation = null
+        return true
+      }
+      return false
+    }
+    return true
   }
-  const animation = {
-    unitLocations,
-    animate: (elapsedTime) => {
+
+  animateShape (cols, rows, speed) {
+    if (cols * rows !== this.area) {
+      throw new Error(`Invalid rectangle transformation: (${this.columns}x${this.rows}) => (${cols}x${rows}) changes the area`)
+    }
+    const unitAnimations = new Array(this.area)
+    for (let i = 0; i < this.area; i++) {
+      const [ey, ex] = findRectangularLocation(rows, cols, i)
+      const end = [ex, ey]
+      unitAnimations[i] = createLinearAnimation(this.unitLocations[i], end, speed)
+    }
+    this.animation = (elapsedTime) => {
       let notDone = false
-      for (let i = 0; i < area; i++) {
+      for (let i = 0; i < this.area; i++) {
         const unitDone = unitAnimations[i].animate(elapsedTime)
         notDone = notDone || !unitDone
-        unitLocations[i] = unitAnimations[i].location
+        this.unitLocations[i] = unitAnimations[i].location
       }
       return !notDone
     }
   }
-  return animation
 }

@@ -1,9 +1,9 @@
 /* eslint-env browser */
 
-import { createRectangularGroupAnimation } from '../../lib/retangular-groups'
+import { RectangularGroup } from '../../lib/retangular-groups'
 
 export function main () {
-  let group = createRectangularGroupAnimation([9, 4], [3, 12], 5)
+  const group = new RectangularGroup(9, 4)
 
   let waitingForDraw = false
   function render () {
@@ -17,15 +17,18 @@ export function main () {
   }
   render()
 
-  const start = new Date()
-  const timer = setInterval(() => {
-    const elapsedTime = new Date() - start
-    const isDone = group.animate(elapsedTime / 1000)
-    if (isDone) {
-      clearInterval(timer)
-    }
-    render()
-  }, 10)
+  setTimeout(() => {
+    group.animateShape(3, 12, 10)
+    const start = new Date()
+    const timer = setInterval(() => {
+      const elapsedTime = new Date() - start
+      const isDone = group.animate(elapsedTime / 1000)
+      if (isDone) {
+        clearInterval(timer)
+      }
+      render()
+    }, 10)
+  }, 100)
 }
 
 function draw (unitLocations) {
