@@ -26,7 +26,9 @@ function startServer (app) {
 }
 
 function addStaticRoute (app) {
-  app.use('/static/', express.static(path.resolve(__dirname, '../../dist/resources/js/index.js')))
+  const staticRoot = path.join(__dirname, '../../resources/')
+  console.log(staticRoot)
+  app.use('/static', express.static(staticRoot))
 }
 
 function addPagesRoute (app) {

@@ -8,13 +8,18 @@
     "clean": "rimraf coverage/ .nyc_output/ out/ dist/",
     "check:lint:readme:markdown": "remark --no-stdout README.md",
     "check:lint:readme": "npm-run-all --parallel check:lint:readme:*",
+    "check:lint:js:root": "standard ./*.js | snazzy",
     "check:lint:js:src": "standard src/**/*.js | snazzy",
     "check:lint:js": "npm-run-all --parallel check:lint:js:*",
     "check:lint": "npm-run-all --parallel check:lint:*",
     "check": "npm-run-all --parallel check:*",
     "verify": "npm-run-all check",
-    "compile": "babel src -d dist/src/",
-    "build": "npm-run-all clean verify compile"
+    "compile:babel": "babel src -d dist/src/",
+    "compile:webpack": "webpack --config ./webpack.config.js",
+    "compile": "npm-run-all compile:*",
+    "build": "npm-run-all clean verify compile",
+    "start": "node .",
+    "watch": "webpack --watch"
   },
   "author": "Brian Mearns <mearns.b@gmail.com>",
   "license": "MIT",
@@ -37,6 +42,7 @@
     "webpack-cli": "3.1.2"
   },
   "dependencies": {
+    "bluebird": "3.5.3",
     "express": "4.16.4"
   }
 }

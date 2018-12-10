@@ -1,5 +1,15 @@
+import mathLessonsDemoPage from '../../pages/math-lessons/demo'
+
 export function configurePagesRouter (router) {
-  router.get('/', (request, response) => {
-    response.type('text/plain').send('Hi.')
-  })
+  router.get('/math-lessons/demo', handleAsPromised((request, reponse) => {
+    return mathLessonsDemoPage()
+  }))
+}
+
+function handleAsPromised (handler) {
+  return (request, response, next) => {
+    return handler(request, response)
+      .then(html => response.type('html').send(html))
+      .catch(next)
+  }
 }
