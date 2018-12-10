@@ -1,23 +1,31 @@
 /* eslint-env browser */
 
-import createRectangularGroup from '../../lib/retangular-groups'
+import { createRectangularGroupAnimation } from '../../lib/retangular-groups'
 
 export function main () {
-  const group = createRectangularGroup(5, 7)
+  let group = createRectangularGroupAnimation([9, 4], [3, 12], 5)
 
-  let waitingToRender = false
-  let renderArgs = []
-  function render (...args) {
-    console.log(args)
-    if (!waitingToRender) {
-      waitingToRender = true
-      requestAnimationFrame(() => draw(...renderArgs))
+  let waitingForDraw = false
+  function render () {
+    if (!waitingForDraw) {
+      waitingForDraw = true
+      requestAnimationFrame(() => {
+        waitingForDraw = false
+        draw(group.unitLocations)
+      })
     }
-    renderArgs = args
   }
+  render()
 
-  const renderHelper = group.createChangeHandler(['unitLocations'], render)
-  renderHelper()
+  const start = new Date()
+  const timer = setInterval(() => {
+    const elapsedTime = new Date() - start
+    const isDone = group(elapsedTime / 1000)
+    if (isDone) {
+      clearInterval(timer)
+    }
+    render()
+  }, 10)
 }
 
 function draw (unitLocations) {
@@ -27,6 +35,7 @@ function draw (unitLocations) {
   const width = canvas.width
   const height = canvas.height
   const scale = 20
+  ctx.clearRect(0, 0, width, height)
 
   ctx.save()
   ctx.fillStyle = '#eee'
