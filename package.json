@@ -43,6 +43,7 @@
   },
   "dependencies": {
     "bluebird": "3.5.3",
-    "express": "4.16.4"
+    "express": "4.16.4",
+    "props-model": "0.2.0"
   }
 }
