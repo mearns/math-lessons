@@ -1,17 +1,21 @@
 /* eslint-env browser */
 
 import * as units from '../../lib/units'
+import * as layouts from '../../lib/layouts'
 import * as animations from '../../lib/animations'
 
 export function main () {
-  const firstLayout = new units.FixedColumnRectangularLayout(7)
-  const secondLayout = new units.FixedColumnRectangularLayout(12)
-  const partitionedLayout = new units.ParitionedLayout(firstLayout, new units.TranslatedLayout(secondLayout, 8, 0), 11)
+  const firstLayout = new layouts.FixedColumnRectangularLayout(7)
+  const secondLayout = new layouts.FixedColumnRectangularLayout(7)
+    .translate(8, 1)
   const group = new units.UnitGroup(firstLayout)
   group.addUnits(38)
 
   const animation = animations.createLinearAnimation(0.5)
-  group.transitionToLayout(partitionedLayout, animation)
+  group.transitionToLayout(
+    firstLayout.yieldTo(secondLayout.transformIndex(index => index - 12), 12, 30),
+    animation
+  )
 
   let waitingForDraw = false
   function render () {
