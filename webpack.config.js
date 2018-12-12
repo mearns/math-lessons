@@ -1,7 +1,7 @@
 const path = require('path')
 
 module.exports = {
-  entry: './src/client-entry/math-lessons/index.js',
+  entry: ['@babel/polyfill', './src/client-entry/math-lessons/index.js'],
   output: {
     filename: 'math-lessons.js',
     path: path.resolve(__dirname, 'dist/resources/js/bundles/')

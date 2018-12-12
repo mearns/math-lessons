@@ -28,6 +28,27 @@ function findRectangularLocation (columns, rows, idx) {
   return [c, r]
 }
 
+export class CollectionOfGroups {
+  constructor () {
+    this.groups = []
+  }
+
+  addGroup (columns, rows, location) {
+    this.groups.push([ new RectangularGroup(columns, rows), location ])
+  }
+
+  getGroup (idx) {
+    return this.groups[idx][0]
+  }
+
+  getUnitLocations () {
+    return this.groups.reduce((allLocs, [group, [gx, gy]]) => {
+      allLocs.push(...group.unitLocations.map(([x, y]) => ([gx + x, gy + y])))
+      return allLocs
+    }, [])
+  }
+}
+
 export class RectangularGroup {
   constructor (columns, rows) {
     this.columns = columns
