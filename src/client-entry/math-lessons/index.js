@@ -17,11 +17,12 @@ export function main () {
   group.splitIntoNewGroup(secondLayout, animations.createLinearAnimation(0.5), 12, 30)
     .then(g2 => {
       allGroups.push(g2)
-      return Promise.delay(1000).then(() => g2)
+      return Promise.delay(100).then(() => g2)
     })
-    .then(g2 => {
-      return g2.transitionToLayout(new layouts.FixedColumnRectangularLayout(5).translate(8, 0), animations.createLinearAnimation(0.5))
-    })
+    .then(g2 => Promise.join(
+      g2.transitionToLayout(new layouts.FixedColumnRectangularLayout(5).translate(8, 0), animations.createLinearAnimation(0.2)),
+      group.transitionToLayout(firstLayout, animations.createLinearAnimation(0.2))
+    ))
     .then(() => console.log('done'))
 
   let waitingForDraw = false
