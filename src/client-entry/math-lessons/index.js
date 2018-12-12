@@ -7,15 +7,15 @@ import * as animations from '../../lib/animations'
 export function main () {
   const firstLayout = new layouts.FixedColumnRectangularLayout(7)
   const secondLayout = new layouts.FixedColumnRectangularLayout(7)
-    .translate(8, 1)
+    .translate(8, 0)
+  const splitLayout = firstLayout.yieldTo(secondLayout.transformIndex(index => index - 12), 12, 30)
+  const finalLayout = splitLayout.yieldTo(firstLayout.transformIndex(x => x + 12 - 30), 30)
   const group = new units.UnitGroup(firstLayout)
   group.addUnits(38)
 
   const animation = animations.createLinearAnimation(0.5)
-  group.transitionToLayout(
-    firstLayout.yieldTo(secondLayout.transformIndex(index => index - 12), 12, 30),
-    animation
-  )
+  group.transitionToLayout(splitLayout, animation)
+    .then(() => group.transitionToLayout(finalLayout, animations.createLinearAnimation(0.2)))
 
   let waitingForDraw = false
   function render () {

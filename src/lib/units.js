@@ -1,3 +1,4 @@
+import ExtrinsicPromise from 'extrinsic-promises'
 
 export class UnitGroup {
   constructor (layout) {
@@ -5,6 +6,7 @@ export class UnitGroup {
     this._targetLayout = null
     this._elapsedAnimationTime = 0
     this._animation = null
+    this._transitionPromise = null
     this._unitLocations = []
     this._layout = layout
     this._dirty = false
@@ -15,6 +17,8 @@ export class UnitGroup {
     this._animation = animation
     this._elapsedAnimationTime = 0
     this._dirty = true
+    this._transitionPromise = new ExtrinsicPromise()
+    return this._transitionPromise.hide()
   }
 
   isStable () {
@@ -50,6 +54,7 @@ export class UnitGroup {
         this._layout = this._targetLayout
         this._animation = null
         this._targetLayout = null
+        this._transitionPromise.fulfill(this)
       }
     } else {
       for (let i = 0; i < this._unitCount; i++) {

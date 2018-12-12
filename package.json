@@ -44,6 +44,7 @@
   "dependencies": {
     "bluebird": "3.5.3",
     "express": "4.16.4",
+    "extrinsic-promises": "2.1.0",
     "props-model": "0.2.0"
   }
 }
