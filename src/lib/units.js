@@ -6,19 +6,21 @@ export class UnitGroup {
     this._targetLayout = null
     this._elapsedAnimationTime = 0
     this._animation = null
-    this._transitionPromise = null
+    this._transitionPromise = Promise.resolve(this)
     this._unitLocations = []
     this._layout = layout
     this._dirty = false
   }
 
   transitionToLayout (newLayout, animation) {
-    this._targetLayout = newLayout
-    this._animation = animation
-    this._elapsedAnimationTime = 0
-    this._dirty = true
-    this._transitionPromise = new ExtrinsicPromise()
-    return this._transitionPromise.hide()
+    return this._transitionPromise.then(() => {
+      this._targetLayout = newLayout
+      this._animation = animation
+      this._elapsedAnimationTime = 0
+      this._dirty = true
+      this._transitionPromise = new ExtrinsicPromise()
+      return this._transitionPromise.hide()
+    })
   }
 
   isStable () {
@@ -30,6 +32,19 @@ export class UnitGroup {
       this._elapsedAnimationTime += timeDelta
       this._dirty = true
     }
+  }
+
+  splitIntoNewGroup (withLayout, animation, from, endingBefore = this._unitCount) {
+    const splitLayout = this._layout.yieldTo(withLayout.transformIndex(i => i - from), from, endingBefore)
+    return this.transitionToLayout(splitLayout, animation)
+      .then(() => {
+        const removedCount = endingBefore - from
+        this._layout = this._layout.transformIndex(i => i < from ? i : i + removedCount)
+        this.removeUnits(removedCount)
+        const newGroup = new UnitGroup(withLayout)
+        newGroup.addUnits(removedCount)
+        return newGroup
+      })
   }
 
   getUnitLocations () {

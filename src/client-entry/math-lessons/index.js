@@ -3,19 +3,26 @@
 import * as units from '../../lib/units'
 import * as layouts from '../../lib/layouts'
 import * as animations from '../../lib/animations'
+import Promise from 'bluebird'
 
 export function main () {
+  const allGroups = []
   const firstLayout = new layouts.FixedColumnRectangularLayout(7)
   const secondLayout = new layouts.FixedColumnRectangularLayout(7)
     .translate(8, 0)
-  const splitLayout = firstLayout.yieldTo(secondLayout.transformIndex(index => index - 12), 12, 30)
-  const finalLayout = splitLayout.yieldTo(firstLayout.transformIndex(x => x + 12 - 30), 30)
   const group = new units.UnitGroup(firstLayout)
   group.addUnits(38)
+  allGroups.push(group)
 
-  const animation = animations.createLinearAnimation(0.5)
-  group.transitionToLayout(splitLayout, animation)
-    .then(() => group.transitionToLayout(finalLayout, animations.createLinearAnimation(0.2)))
+  group.splitIntoNewGroup(secondLayout, animations.createLinearAnimation(0.5), 12, 30)
+    .then(g2 => {
+      allGroups.push(g2)
+      return Promise.delay(1000).then(() => g2)
+    })
+    .then(g2 => {
+      return g2.transitionToLayout(new layouts.FixedColumnRectangularLayout(5).translate(8, 0), animations.createLinearAnimation(0.5))
+    })
+    .then(() => console.log('done'))
 
   let waitingForDraw = false
   function render () {
@@ -23,7 +30,7 @@ export function main () {
       waitingForDraw = true
       requestAnimationFrame(() => {
         waitingForDraw = false
-        draw(group.getUnitLocations())
+        draw(allGroups)
       })
     }
   }
@@ -31,18 +38,15 @@ export function main () {
 
   setTimeout(() => {
     const start = new Date()
-    const timer = setInterval(() => {
+    setInterval(() => {
       const elapsedTime = new Date() - start
-      const done = group.tick(elapsedTime / 1000)
-      if (done) {
-        clearInterval(timer)
-      }
+      allGroups.forEach(g => g.tick(elapsedTime / 1000))
       render()
     }, 10)
   }, 100)
 }
 
-function draw (unitLocations) {
+function draw (allGroups) {
   const fill = 0.85
   const canvas = document.getElementById('canvas')
   const ctx = canvas.getContext('2d')
@@ -54,10 +58,12 @@ function draw (unitLocations) {
   ctx.save()
   ctx.fillStyle = '#eee'
   ctx.strokeStyle = '#ddd'
-  for (let [x, y] of unitLocations) {
-    const rect = [scale * x, scale * y, scale * fill, scale * fill]
-    ctx.fillRect(...rect)
-    ctx.strokeRect(...rect)
+  for (let group of allGroups) {
+    for (let [x, y] of group.getUnitLocations()) {
+      const rect = [scale * x, scale * y, scale * fill, scale * fill]
+      ctx.fillRect(...rect)
+      ctx.strokeRect(...rect)
+    }
   }
   ctx.restore()
 }
