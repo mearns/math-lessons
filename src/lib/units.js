@@ -34,9 +34,47 @@ export class UnitGroup {
     }
   }
 
+  mergeIn (group, animation, { scramble = false } = {}) {
+    return this._transitionPromise
+      .then(() => group._transitionPromise)
+      .then(() => {
+        const addedCount = group._unitCount
+        const originalUnitCount = this._unitCount
+        const splitLayout = this._layout.yieldTo(
+          group._layout.transformIndex(i => i - originalUnitCount),
+          this._unitCount
+        )
+        this.addUnits(addedCount)
+        group.removeUnits(addedCount)
+        const originalLayout = this._layout
+        this._layout = splitLayout
+        return this.transitionToLayout(
+          !scramble ? originalLayout : originalLayout.yieldTo(
+            originalLayout.transformIndex(i => {
+              const baseIndex = (i - originalUnitCount)
+              const scrambledIndex = (addedCount + addedCount - baseIndex) % addedCount
+              return originalUnitCount + scrambledIndex
+            }),
+            originalUnitCount
+          ),
+          animation
+        )
+          .then(() => {
+            this._layout = originalLayout
+            this._dirty = true
+          })
+      })
+  }
+
   splitIntoNewGroup (withLayout, animation, from, endingBefore = this._unitCount) {
-    const splitLayout = this._layout.yieldTo(withLayout.transformIndex(i => i - from), from, endingBefore)
-    return this.transitionToLayout(splitLayout, animation)
+    return this._transitionPromise.then(() => {
+      const splitLayout = this._layout.yieldTo(
+        withLayout.transformIndex(i => i - from),
+        from,
+        endingBefore
+      )
+      return this.transitionToLayout(splitLayout, animation)
+    })
       .then(() => {
         const removedCount = endingBefore - from
         this._layout = this._layout.transformIndex(i => i < from ? i : i + removedCount)

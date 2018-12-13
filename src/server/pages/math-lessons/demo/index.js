@@ -6,7 +6,7 @@ export default function getHtml () {
     <title>Demo</title>
   </head>
   <body>
-    <canvas style='border:1px solid #eee' id='canvas' width='400' height='300'></canvas>
+    <canvas style='border:1px solid #eee' id='canvas' width='800' height='600'></canvas>
     <script type='application/javascript' src='/static/js/bundles/math-lessons.js'></script>
   </body>
 `)
