@@ -34,7 +34,7 @@ export class UnitGroup {
     }
   }
 
-  mergeIn (group, animation, { scramble = false } = {}) {
+  mergeIn (group, animation, { scramble = false, stagger = 0 } = {}) {
     return this._transitionPromise
       .then(() => group._transitionPromise)
       .then(() => {
@@ -58,6 +58,7 @@ export class UnitGroup {
             originalUnitCount
           ),
           animation
+            .yieldTo(animation.staggered(stagger).transformIndex(i => i - originalUnitCount), originalUnitCount)
         )
           .then(() => {
             this._layout = originalLayout
@@ -99,7 +100,7 @@ export class UnitGroup {
       for (let i = 0; i < this._unitCount; i++) {
         const start = this._layout.getUnitLocation(i)
         const end = this._targetLayout.getUnitLocation(i)
-        const res = this._animation(this._elapsedAnimationTime, start, end)
+        const res = this._animation.tween(this._elapsedAnimationTime, start, end, i, this._unitCount)
         this._unitLocations[i] = res.loc
         more = more || res.more
       }

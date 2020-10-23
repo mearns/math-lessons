@@ -19,8 +19,8 @@ export function main () {
   g3.addUnits(20)
   allGroups.push(g3)
 
-  Promise.delay(500)
-    .then(() => g3.mergeIn(group, animations.createLinearAnimation(0.05), { scramble: true }))
+  Promise.delay(0)
+    .then(() => g3.mergeIn(group, new animations.LinearAnimation(0.1), { scramble: false, stagger: 10 }))
 
   // group.splitIntoNewGroup(secondLayout, animations.createLinearAnimation(0.5), 12, 30)
   //   .then(g2 => {
